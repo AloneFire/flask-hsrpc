@@ -33,5 +33,5 @@ pip install --upgrade flask-hsrpc
 ## PYPI 打包上传
 
 ```
-python setup.py sdist upload -r nexus
+python setup.py sdist upload -r
 ```

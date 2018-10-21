@@ -26,10 +26,10 @@ __version__ = find_version('flask_hsrpc/__version__.py')
 setuptools.setup(
     name="flask-hsrpc",
     version=__version__,
-    url="http://gitlab.jiehun.tech/Devops/common/flask-hsrpc.git",
+    url="https://github.com/AloneFire/flask-hsrpc.git",
 
-    author="bevis",
-    author_email="author@email.com",
+    author="alonefire",
+    author_email="alonefire@foxmail.com",
 
     description="flask hsrpc plugin",
     long_description='flask hsrpc plugin',
