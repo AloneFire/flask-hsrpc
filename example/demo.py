@@ -12,19 +12,20 @@ class Config(object):
     APP_VERSION = "0.1.0"
     APP_DESC = "Hsrpc Demo"
     SERVICE_INFO = {
-        "address": "192.168.88.99",
+        "address": "192.168.1.6",
         "port": 5301,
         "meta": {
             "apidoc": "/apidocs"
         },
         "check": {
             "name": "health",
-            "http": "http://192.168.88.99:5301/health",
+            "http": "http://192.168.1.6:5301/health",
             "interval": "5s"
         }
 
     }
     HSRPC_AUTO_UNREGISTER = True
+    CONSUL_HOST = "192.168.1.10"
 
 
 app = Flask(__name__)

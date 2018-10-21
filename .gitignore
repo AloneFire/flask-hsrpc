@@ -25,3 +25,4 @@ venv/
 *.err
 service_id
 dist/
+.vscode/
