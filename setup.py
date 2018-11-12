@@ -40,7 +40,7 @@ setuptools.setup(
         "Flask>=1.0.2",
         "marshmallow>=2.15.1",
         "python-consul>=0.7.2",
-        "requests>=2.18.4"
+        "requests>=2.20.0"
     ],
 
     classifiers=[
