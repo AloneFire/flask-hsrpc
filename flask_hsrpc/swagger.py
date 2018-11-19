@@ -32,7 +32,8 @@ class SwaggerGenerator(object):
                     "name": field.load_from if field.load_from else key,
                     "type": field.__type_name__() if hasattr(field, "__type_name__") else field.__class__.__name__,
                     "required": field.required,
-                    "in": ["path"] if method in ("GET") else ["json"]
+                    "in": ["path"] if method in ("GET") else ["json"],
+                    "description": field.metadata.get("help", "") if field.metadata else ""
                 } for key, field in schema._declared_fields.items()] if schema else []
             }
 
