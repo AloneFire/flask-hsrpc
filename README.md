@@ -1,5 +1,7 @@
 # flask-hsrpc (http simple rpc)
 
+[![Build Status](https://travis-ci.com/AloneFire/flask-hsrpc.svg?branch=master)](https://travis-ci.com/AloneFire/flask-hsrpc)
+
 > 简化接口路由、接口文档、请求参数自动验证、统一响应、日志、服务注册及自动发现等一体化 flask 插件
 
 ## 安装
