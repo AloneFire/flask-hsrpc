@@ -9,6 +9,7 @@ class SwaggerGenerator(object):
                 "description": description if description else app.config.get("APP_DESC", "") if app else "",
                 "version": version if version else app.config.get("APP_VERSION", "1.0.0") if app else "1.0.0"
             },
+            "host": f"{app.config.get('SERVICE_INFO',{}).get('address','')}:{app.config.get('SERVICE_INFO',{}).get('port','') }" if app else "",
             "paths": {}
         }
 
@@ -19,6 +20,8 @@ class SwaggerGenerator(object):
             "version": version if version else app.config.get("APP_VERSION", "1.0.0") if app else "1.0.0",
             "description": description if description else app.config.get("APP_DESC", "") if app else ""
         })
+
+        self.desc["host"] = f"{app.config.get('SERVICE_INFO',{}).get('address','')}:{app.config.get('SERVICE_INFO',{}).get('port','') }" if app else ""
 
     def add_path(self, path, schema=None, methods=None, description="", tags=[]):
         methods = methods if methods else ["GET"]
@@ -32,7 +35,7 @@ class SwaggerGenerator(object):
                     "name": field.load_from if field.load_from else key,
                     "type": field.__type_name__() if hasattr(field, "__type_name__") else field.__class__.__name__,
                     "required": field.required,
-                    "in": ["path"] if method in ("GET") else ["json"],
+                    "in": "path" if method in ("GET") else "formData",
                     "description": field.metadata.get("help", "") if field.metadata else ""
                 } for key, field in schema._declared_fields.items()] if schema else []
             }
