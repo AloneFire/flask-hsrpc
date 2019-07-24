@@ -3,6 +3,15 @@ from requests.api import request
 from .response import ErrorResponse
 
 
+class ApiRequestException(Exception):
+    def __init__(self, **kwargs):
+        self.code = kwargs.get("code")
+        self.message = kwargs.get("message")
+        self._request = kwargs.get("_request")
+        self.kwargs = kwargs
+        super().__init__(f"Hsrpc Api Request Error: {self.code} - {self.message} ({self._request})")
+
+
 class ApiRequests(object):
     consul = None
 
@@ -14,13 +23,13 @@ class ApiRequests(object):
 
     def _base_request(self, method, sys_name, func_name, model_name="default", prefix="", protocol="http", **kwargs):
         node = self.consul.get_health_service_node_by_balance(sys_name)
+        uri = [prefix if prefix and prefix != "/" else ""]
+        if model_name and model_name != "default":
+            uri.append(model_name.lower())
+        uri.append(func_name)
         if node:
             host = node["Service"]["Address"]
             port = node["Service"]["Port"]
-            uri = [prefix if prefix and prefix != "/" else ""]
-            if model_name and model_name != "default":
-                uri.append(model_name.lower())
-            uri.append(func_name)
             url = "{protocol}://{host}:{port}{uri}".format(protocol=protocol, host=host, port=port, uri="/".join(uri))
             resp = request(method, url, **kwargs)
 
@@ -28,13 +37,20 @@ class ApiRequests(object):
                 rel = resp.json()
                 error = rel.get("error")
                 if error:
-                    error["code"] = "request error: " + error["code"]
-                    error["message"] = f"request [{method}] - {sys_name} - {'/'.join(uri)} ({error['message']})"
-                return rel.get("data"), ErrorResponse.convert_by_dict(rel.get("error"), resp.status_code)
-            except Exception:
-                raise Exception("request {0}-{1}-{2} fail".format(sys_name, model_name, func_name), resp.text)
+                    error["_request"] = f"[{method.upper()}] - {sys_name} - {host}:{port} - {'/'.join(uri)}"
+                return rel.get("data"), ApiRequestException(**error)
+            except Exception as ex:
+                return None, ApiRequestException(**{
+                    "code": "request failed",
+                    "message": str(ex),
+                    "_request": f"[{method.upper()}] - {sys_name} - {host}:{port} - {'/'.join(uri)}"
+                })
         else:
-            raise Exception("[{0}]:not find alive system".format(sys_name))
+            return None, ApiRequestException(**{
+                "code": "request failed",
+                "message": f"[{sys_name}: not find alive system]",
+                "_request": f"[{method.upper()}] - {sys_name} -  - {'/'.join(uri)}"
+            })
 
     def get(self, sys_name, func_name, model_name="default", prefix="", protocol="http", params=None, **kwargs):
         return self._base_request("get", sys_name, func_name, model_name, prefix, protocol, params=params, **kwargs)

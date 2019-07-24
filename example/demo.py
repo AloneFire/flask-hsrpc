@@ -5,6 +5,7 @@ from flask_hsrpc import Hsrpc
 from flask_hsrpc.request_parser import BaseSchema, fields
 from flask_hsrpc.response import ErrorResponse
 from flask_hsrpc.__version__ import __version__ as hsrpc_version
+import logging
 
 
 class Config(object):
@@ -51,6 +52,15 @@ def login_demo():
 @rpc.route(description="Log Demo")
 def log_demo():
     rpc.logger.info("I am write log to file")
+    return {
+        "status": "ok"
+    }
+
+
+@rpc.route(description="Log Demo 2")
+def log_demo2():
+    logger = logging.getLogger("flask.app")
+    logger.info("I am write log to file")
     return {
         "status": "ok"
     }

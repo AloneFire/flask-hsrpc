@@ -21,7 +21,7 @@ def response_factory(data=None, error=None):
                 "detail": None
             },
             "data": data
-        })
+        }), 500
     else:
         return jsonify({
             "error": None,
@@ -50,7 +50,7 @@ class ErrorResponse(Exception):
         return None
 
     def __str__(self):
-        return "ErrorResponse({},{},{}) {}".format(self.code,self.message,self.detail,self.status_code)
+        return "ErrorResponse({},{},{}) {}".format(self.code, self.message, self.detail, self.status_code)
 
 
 def page_response(data, total):

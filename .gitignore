@@ -26,3 +26,4 @@ venv/
 service_id
 dist/
 .vscode/
+build/
