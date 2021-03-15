@@ -11,10 +11,11 @@ import atexit
 
 class Hsrpc(object):
 
-    def __init__(self, app=None, prefix="", decorator=default_decorator, catch_error=True):
+    def __init__(self, app=None, prefix="", decorator=default_decorator, catch_error=True, default_headers=None):
         """"
         构造函数
         """
+        self.default_headers = default_headers
         self.prefix = prefix
         self.catch_error = catch_error
         self.decorator = decorator
@@ -36,6 +37,7 @@ class Hsrpc(object):
         :return:
         """
         if app:
+            self.app = app
             self._register_view(app)
             # 注册错误捕获方法
             if self.catch_error:
@@ -76,7 +78,7 @@ class Hsrpc(object):
         # 生成路径
         name = func_name if func_name else func.__name__
         if use_decorator and self.decorator:
-            view = self.decorator(func)
+            view = self.decorator(func, self)
         else:
             view = func
         if model_name:
@@ -135,3 +137,7 @@ class Hsrpc(object):
             return f
 
         return decorator
+
+    def after_request(self, *args, **kwargs):
+        if self.app:
+            return self.app.after_request(*args, **kwargs)

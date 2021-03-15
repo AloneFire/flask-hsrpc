@@ -38,7 +38,8 @@ class ApiRequests(object):
                 error = rel.get("error")
                 if error:
                     error["_request"] = f"[{method.upper()}] - {sys_name} - {host}:{port} - {'/'.join(uri)}"
-                return rel.get("data"), ApiRequestException(**error)
+                    error = ApiRequestException(**error)
+                return rel.get("data"), error
             except Exception as ex:
                 return None, ApiRequestException(**{
                     "code": "request failed",

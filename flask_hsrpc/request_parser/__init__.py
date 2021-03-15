@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import request
-from marshmallow import Schema
+from marshmallow import Schema, ValidationError
 from ..response import ErrorResponse
 from . import validators
 from . import fields
@@ -30,10 +30,12 @@ class BaseSchema(Schema):
             args = request.form
         else:
             args = request.args
-
-        rel, err = self.load(args)
-        if err:
-            raise ErrorResponse("args error", "请求参数错误", error_detail=err)
+        try:
+            rel = self.load(args, unknown="INCLUDE")
+        except ValidationError as err:
+            raise ErrorResponse("args error", "请求参数错误", error_detail=err.args)
+        except Exception as err:
+            raise ErrorResponse("args error", "请求参数内部错误", error_detail=str(err))
         return ArgsDict(rel)
 
 

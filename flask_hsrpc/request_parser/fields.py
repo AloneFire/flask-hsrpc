@@ -5,12 +5,19 @@ from marshmallow.fields import List as BaseList, Number as BaseNumber
 from marshmallow import utils
 import enum
 from datetime import datetime
+from werkzeug.datastructures import ImmutableMultiDict
 
 
 class Enum(Field):
-    def __type_name__(self):
-        enum_item = [f"{str(v.value)} <{k}>" for k, v in self.enum_obj.__members__.items()]
-        return f'Enum({" , ".join(enum_item)})'
+    def __field_doc_schema__(self):
+        enum_values = [e.value for e in self.enum_obj]
+        doc = {
+            "type": "string",
+            "enum": enum_values
+        }
+        if self.missing or self.default:
+            doc["default"] = self.missing.value if self.missing else self.default.value
+        return doc
 
     def __init__(self, enum_obj, **kwargs):
         super().__init__(**kwargs)
@@ -19,12 +26,12 @@ class Enum(Field):
         else:
             raise ValueError("The type is not Enum")
 
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr, obj, **kwargs):
         if value is None:
             return None
         return value.value
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if not self.required and (value is None or value == ''):
             return self.missing
         try:
@@ -38,51 +45,41 @@ class Enum(Field):
 
 
 class List(BaseList):
-    def __type_name__(self):
-        field = self.container
-        return f'List({field.__type_name__() if hasattr(field, "__type_name__") else field.__class__.__name__})'
+    def __field_doc_schema__(self):
+        field = self.inner
+        sub_schema = field.__field_doc_schema__() if hasattr(field, "__field_doc_schema__") else {
+            "type": field.__class__.__name__.lower()
+        }
+        return {
+            "type": "array",
+            "items": sub_schema
+        }
 
-    def _deserialize(self, value, attr, data):
-        if not utils.is_collection(value):
-            value = dict(data).get(attr)
-            if not utils.is_collection(value):
-                try:
-                    result = self.container.deserialize(value)
-                    return [result]
-                except ValidationError:
-                    self.fail('invalid')
-
-        result = []
-        errors = {}
-        for idx, each in enumerate(value):
-            try:
-                result.append(self.container.deserialize(each))
-            except ValidationError as e:
-                result.append(e.data)
-                errors.update({idx: e.messages})
-
-        if errors:
-            raise ValidationError(errors, data=result)
-
-        return result
+    def _deserialize(self, value, attr, data, **kwargs):
+        if isinstance(data, ImmutableMultiDict):
+            value = data.to_dict(flat=False).get(attr)
+        return super()._deserialize(value, attr, data, **kwargs)
 
 
 class Number(BaseNumber):
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if not self.required and (value is None or value == ''):
             return self.missing
         return self._validated(value)
 
 
 class DateTime(Field):
-    def __type_name__(self):
-        return f'DateTime(\"{self.date_format}\")'
+    def __field_doc_schema__(self):
+        return {
+            "type": "string",
+            "format": self.date_format
+        }
 
     def __init__(self, date_format="%Y-%m-%d %H:%M:%S", **kwargs):
         super().__init__(**kwargs)
         self.date_format = date_format
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if not self.required and (value is None or value == ''):
             return self.missing
 

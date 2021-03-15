@@ -1,32 +1,36 @@
 # -*- coding: utf-8 -*-
-from flask import jsonify
+from flask import jsonify, make_response
 from werkzeug.exceptions import HTTPException
 
 
-def response_factory(data=None, error=None):
+def response_factory(data=None, error=None, headers=None):
     if error and isinstance(error, ErrorResponse):
-        return jsonify({
+        resp = make_response(jsonify({
             "error": {
                 "code": error.code,
                 "message": error.message,
                 "detail": error.detail
             },
             "data": data
-        }), error.status_code
+        }), error.status_code)
     elif error and isinstance(error, Exception):
-        return jsonify({
+        resp = make_response(jsonify({
             "error": {
                 "code": "error",
                 "message": str(error),
                 "detail": None
             },
             "data": data
-        }), 500
+        }), 500)
     else:
-        return jsonify({
+        resp = make_response(jsonify({
             "error": None,
             "data": data
-        }), 200
+        }), 200)
+    if headers:
+        for k, v in headers.items():
+            resp.headers[k] = v
+    return resp
 
 
 class ErrorResponse(Exception):
