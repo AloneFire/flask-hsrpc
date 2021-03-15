@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from marshmallow.fields import *
-from marshmallow.exceptions import ValidationError
-from marshmallow.fields import List as BaseList, Number as BaseNumber
-from marshmallow import utils
 import enum
 from datetime import datetime
+
+from marshmallow.exceptions import ValidationError
+from marshmallow.fields import *
+from marshmallow.fields import List as BaseList, Number as BaseNumber
 from werkzeug.datastructures import ImmutableMultiDict
 
 

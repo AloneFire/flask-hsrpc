@@ -37,10 +37,10 @@ setuptools.setup(
     packages=setuptools.find_packages(),
 
     install_requires=[
-        "Flask>=1.0.2",
-        "marshmallow>=2.15.1",
-        "python-consul>=0.7.2",
-        "requests>=2.20.0"
+        "Flask>=1.1.2",
+        "marshmallow==3.0.0",
+        "python-consul>=1.1.0",
+        "requests>=2.20.1"
     ],
 
     classifiers=[
