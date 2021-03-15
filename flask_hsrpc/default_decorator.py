@@ -3,6 +3,7 @@ import functools
 from .response import response_factory, ErrorResponse
 from werkzeug.exceptions import HTTPException
 from flask import current_app
+import traceback
 
 
 def default_decorator(func, app):
@@ -16,8 +17,7 @@ def default_decorator(func, app):
             return response_factory(error=ex, headers=app.default_headers)
 
         except Exception as ex:
-            current_app.logger.error(ex)
-            print("DEBUG:", current_app.config.get("DEBUG", False))
+            current_app.logger.error(f"{ex}\n{traceback.format_exc()}", extra={'realFunc': func})
             if current_app.config.get("DEBUG", False):
                 raise ex
             return response_factory(error=ex, headers=app.default_headers)
